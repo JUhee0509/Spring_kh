@@ -12,17 +12,40 @@
 		<script src="/vs/resources/js/httpRequest.js"></script>
 		
 		<script>
-			function del(f) {
-				
+			function modify(f) {
 				let idx = f.idx.value;
-				let c_pwd = f.c_pwd.value;//입력받은 비번
+				let pwd = f.c_pwd.value;
+				if( !confirm("수정 하시겠습니까") ){
+					return;
+				}
+				let url = "modify_pwd_chk.do";
+				let param = "idx="+idx+"&pwd="+encodeURIComponent(pwd);
+				sendRequest(url, param, resultModify, "post");
+			}
+			function resultModify() {
+				if(xhr.readyState == 4 && xhr.status == 200){
+					let data = xhr.responseText;
+					let json = (new Function('return ' +data))();
+					if(json[0].result == 'no'){
+						alert("비밀번호 불일치");
+						return;
+					}else{
+						//json으로 넘겨받은 idx값을 가지고 수정 폼으로 이동
+						location.href="modify_form.do?idx="+json[0].idx
+					}
+				}
+			}
+			
+			function del(f) {
+				let idx = f.idx.value;
+				let pwd = f.c_pwd.value;//입력받은 비번
 				
 				let url = "delete.do";
-				let param = "idx="+idx+"&pwd="+encodeURIComponent(c_pwd);
+				let param = "idx="+idx+"&pwd="+encodeURIComponent(pwd);
 				sendRequest(url, param, resultFn, "post");
 			}
 			function resultFn() {
-				if(xhr.readyState == 4 & xhr.status == 200){
+				if(xhr.readyState == 4 && xhr.status == 200){
 					let data = xhr.responseText;
 					let json = (new Function('return ' +data))();
 					
@@ -55,7 +78,6 @@
 					<div class="type_regdate"> 작성일 : ${vo.regdate } </div>
 					<form>
 						<input type="hidden" name="idx" value="${vo.idx }">
-						<input type="hidden" name="pwd" value="${vo.pwd }">
 						비밀번호<input type="password" name="c_pwd">
 						
 						<input type="button" value="수정" onclick="modify(this.form)">

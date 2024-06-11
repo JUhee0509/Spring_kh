@@ -34,4 +34,14 @@ SqlSession sqlSession;
 		int res = sqlSession.insert("v.visit_delete", idx);
 		return res;
 	}
+	//게시글 수정을 위해 idx에 해당되는 객제 한 건 조회
+	public VisitVO selectOne(int idx) { 
+		VisitVO vo = sqlSession.selectOne("v.select_one", idx);
+		return vo;
+	}
+	//게시글 수정
+	public int update(VisitVO vo) {
+		int res = sqlSession.insert("v.visit_update", vo);
+		return res;
+	}
 }

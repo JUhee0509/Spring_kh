@@ -67,4 +67,40 @@ public class VisitController {
 			return "[{'result':'no'}]";
 		}
 	}
+	@RequestMapping("modify_pwd_chk.do")
+	@ResponseBody
+	public String modify_chk(VisitVO vo) {
+		boolean isValid = Common.SecurePwd.decodePwd(vo, visit_dao);
+		if(isValid) {
+			//비밀번호 일치함으로 수정 폼으로 이동
+			String residx = String.format("[{'result':'clear','idx':'%d'}]", vo.getIdx());
+			return residx;
+		}else {
+			return "[{'result':'no'}]";
+		}
+	}
+	@RequestMapping("modify_form.do")
+	public String modify_form(int idx, Model model) {
+		VisitVO vo = visit_dao.selectOne(idx);
+		model.addAttribute("vo", vo);
+		return Common.Visit.VIEW_PATH + "modify_form.jsp";
+	}
+	//글 수정
+	@RequestMapping("modify_fin.do")
+	@ResponseBody
+	public String modify(VisitVO vo, HttpServletRequest request) {
+		String ip = request.getRemoteAddr();//ip를 받아오기
+		vo.setIp(ip);//vo에 ip넣어주기
+		
+		//비밀번호 암호화
+		String encodePwd = Common.SecurePwd.encodePwd(vo.getPwd());
+		vo.setPwd(encodePwd);
+		
+		int res = visit_dao.update(vo);
+		if (res > 0) {
+			return "[{'result':'clear'}]";
+		}else {
+			return "[{'result':'fail'}]";
+		}
+	}
 }
