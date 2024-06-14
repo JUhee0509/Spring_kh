@@ -26,6 +26,7 @@
 	
 	<beans:bean class="com.kh.bbs.BoardController">
 		<beans:constructor-arg ref="board_daoBean"/>
+		<beans:constructor-arg ref="comment_daoBean"/>
 	</beans:bean>
 	
 </beans:beans>

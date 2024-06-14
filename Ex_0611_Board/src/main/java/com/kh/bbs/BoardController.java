@@ -12,11 +12,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import dao.BoardDAO;
+import dao.CommentDAO;
 import util.Common;
 import util.Paging;
 import vo.BoardVO;
+import vo.CommentVO;
 
 @Controller
 public class BoardController {
@@ -28,8 +31,11 @@ public class BoardController {
 	HttpSession session;
 
 	BoardDAO board_dao;
-	public BoardController(BoardDAO board_dao) {
+	CommentDAO comment_dao;
+	
+	public BoardController(BoardDAO board_dao, CommentDAO comment_dao) {
 		this.board_dao = board_dao;
+		this.comment_dao = comment_dao;
 	}
 
 	@RequestMapping(value={"/", "/list.do"})
@@ -134,12 +140,119 @@ public class BoardController {
 		String ip = request.getRemoteAddr();
 		vo.setIp(ip);
 		
-		//새글 등록
+		//새글 담기
 		board_dao.insert(vo);
 		//response.sendRedirect("list.do");
 		return "redirect:list.do";		
 	}
 	
+	//글 삭제
+	@RequestMapping("/del.do")
+	@ResponseBody
+	public String delete(int idx ) {
+		//삭제(된 것처럼 업데이트)를 위한 idx수신
+				
+		int res = board_dao.del_update(idx);
+				
+		String resultStr = "";
+		String result = "no";
+				
+		if(res == 1) {
+			result = "yes";
+		}
+				
+		resultStr = String.format("[{'result':'%s'}]", result);
+		
+		return resultStr;
+	}
+	//댓글 작성 화면
+	@RequestMapping("/reply_form.do")
+	public String replyForm(int idx, String page) {
+		return Common.Board.VIEW_PATH+"board_reply.jsp?idx="+idx+"&page="+page;
+	}
+	//댓글 작성
+	@RequestMapping("/reply.do")
+	public String reply(String page, BoardVO vo ) {
+		
+		String ip = request.getRemoteAddr();
+		
+		//댓글을 작성하고 싶은 게시글의 idx에 해당되는 상세정보를 얻기
+		BoardVO baseVO = board_dao.selectOne(vo.getIdx());
+		
+		//가져온 baseVO의 step보다 큰 값을 가진 데이터들의 Step을 +1처리
+		board_dao.update_step(baseVO);
+		
+		//댓글VO
+		vo.setIp(ip);
+		
+		//댓글이 들어갈 위치 설정
+		vo.setRef(baseVO.getRef());
+		vo.setStep(baseVO.getStep()+1);
+		vo.setDepth(baseVO.getDepth()+1);
+		
+		board_dao.reply(vo);
+		//response.sendRedirect("list.do?page="+page);
+		return "redirect:list.do?page="+page;
+	}
+	@RequestMapping("/comment_insert.do")
+	@ResponseBody
+	public String comment_insert( CommentVO vo ) {
+		
+		int res = comment_dao.insert(vo);
+		
+		String result = "no";
+		if( res > 0) {
+			result = "yes";
+		}
+		String resultStr = String.format("[{'result':'%s'}]", result);
+		return resultStr;
+	}
+	//코멘트갱신
+	@RequestMapping("/comment_list.do")
+	public String comment_list( Model model, String page, int idx ) {
+		int nowPage = 1;
+		
+		if (page != null && !page.isEmpty()) {
+			nowPage = Integer.parseInt(page);
+		}
+		int start = (nowPage -1) * Common.Comment.BLOCKLIST +1;
+		int end = start + Common.Comment.BLOCKLIST -1;
+		
+		
+		//메인 게시글 번호
+		
+		Map<String, Object> map = new HashMap<String, Object>();
+		map.put("idx", idx);
+		map.put("start", start);
+		map.put("end", end);
+		
+		List<CommentVO> list = comment_dao.selectList(map);
+		int row_total = comment_dao.getRowTotal(map);
+		
+		//페이지메뉴
+		String pageMenu = Paging.getPaging("comment_list.do",
+											nowPage, 
+											row_total, 
+											Common.Comment.BLOCKLIST, 
+											Common.Comment.BLOCKPAGE);
+		
+		model.addAttribute("list", list);
+		model.addAttribute("pageMenu", pageMenu);
+		
+		return Common.Comment.VIEW_PATH + "comment_list.jsp";
+	}
+	@RequestMapping("/comment_del")
+	@ResponseBody
+	public String comment_delete( int c_idx ) {
+		int res = comment_dao.comm_del(c_idx);
+		
+		String result = "no";
+		if(res >0) {
+			result = "yes";
+		}
+		String resultStr = String.format("[{'result':'%s'}]", result);
+		return resultStr;
+	}
 }
 
 

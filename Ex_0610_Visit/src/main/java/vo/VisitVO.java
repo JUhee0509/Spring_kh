@@ -1,9 +1,27 @@
 package vo;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public class VisitVO {
 	private int idx;
 	private String name, content, pwd, ip, regdate;
 	
+	//파일업로드와 관련된 객체
+	private MultipartFile photo;
+	private String filename;
+	
+	public MultipartFile getPhoto() {
+		return photo;
+	}
+	public void setPhoto(MultipartFile photo) {
+		this.photo = photo;
+	}
+	public String getFilename() {
+		return filename;
+	}
+	public void setFilename(String filename) {
+		this.filename = filename;
+	}
 	public int getIdx() {
 		return idx;
 	}

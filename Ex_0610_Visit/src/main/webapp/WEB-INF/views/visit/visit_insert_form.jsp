@@ -9,7 +9,6 @@
 		<script>
 			function send(f){
 				
-				f.method="post";
 				f.action="insert.do";
 				f.submit();
 			}
@@ -18,7 +17,7 @@
 	</head>
 	
 	<body>
-		<form>
+		<form method="post" enctype="multipart/form-data">
 			<table border="1" align="center">
 				<caption>::: 새 글 등록 :::</caption>
 				
@@ -39,6 +38,11 @@
 				<tr>
 					<th>비밀번호</th>
 					<td><input type="password" name="pwd"></td>
+				</tr>
+				
+				<tr>
+					<th>첨부파일</th>
+					<td><input type="file" name="photo"></td>
 				</tr>
 				
 				<tr>

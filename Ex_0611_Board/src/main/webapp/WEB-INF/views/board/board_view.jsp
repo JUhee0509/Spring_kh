@@ -111,7 +111,7 @@
 			
 		
 			function reply(){
-				location.href="board_reply.jsp?idx=${vo.idx}&page=${param.page}";
+				location.href="reply_form.do?idx=${vo.idx}&page=${param.page}";
 			}
 			
 			/* comment등록 메서드 */

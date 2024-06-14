@@ -3,6 +3,8 @@ package util;
 public class Common {
 	//댓글 페이징 관련
 	public static class Comment{
+		public static final String VIEW_PATH = "/WEB-INF/views/comment/";
+		
 		public final static int BLOCKLIST = 5;
 		public final static int BLOCKPAGE = 3;
 	}
